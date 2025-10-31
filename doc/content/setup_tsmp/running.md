@@ -1,5 +1,13 @@
 # Running TSMP-PDAF #
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 The execution of TSMP-PDAF and the necessary input is closely related
 to the one of TSMP. For executing TSMP, a ParFlow database file
 `*.pfidb` (see ParFlow documentation for more details), an input file

@@ -1,5 +1,13 @@
 # Getting Started
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 **Throughout this quick start guide a distinction is made between HPSC-TerrSys users who use specific HPC systems at HPC centres in Germany and external users. Through centralized machinefiles and compute environment initialisation scripts, TSMP can be very quickly adjusted to any other HPC site.**
 
 For a general documentation on how to use TSMP, please refer to the more detailed [Building TSMP](./build_tsmp/build_examples.md#building-tsmp) section.

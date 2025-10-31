@@ -1,5 +1,13 @@
 # Structure of DA inside TSMP #
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 The directory `intf_DA` holds the interfaces of the component models
 to data assimilation frameworks (`dart`, `kenda` (currently not in
 `master`) and `pdaf`) alongside scripts for building the data

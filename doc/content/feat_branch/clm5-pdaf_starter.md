@@ -1,5 +1,13 @@
 # CLM5-PDAF Starting instructions
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 ## 1.  Install components
 
 The following instructions assume you are working on the JSC machine `JURECA`. If you are working on another JSC machine switch the name appropriately and the instructions should still work. Running CLM5-PDAF on non JSC machines is not covered in these instructions but should be similar if TSMP-PDAF, PDAF, and CLM5 can be installed on the machine. 

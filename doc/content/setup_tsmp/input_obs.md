@@ -1,5 +1,13 @@
 # Observation input #
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 Observation input consists of a number of different inputs:
 - Observation files with correct name and content
 - Command Line Options

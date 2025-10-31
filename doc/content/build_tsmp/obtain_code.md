@@ -1,6 +1,22 @@
 # Obtaining the code 
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 ## TSMP
+
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
 
 The source code of TSMP (Terrestrial System Modeling Platform) can be obtained from a git-repository hosted on Github:
 <https://github.com/HPSCTerrSys/TSMP>. On this website, a README file explains how to run TSMP for the first time on Linux.
@@ -22,6 +38,14 @@ and from the home page of the Centre for High-Performance Scientific Computing i
 There is also a public TSMP Virtual Machine available for download. This is a Ubuntu virtual machine containing TSMP and a tutorial on data assimilation. The webpage for downloading (TSMP Virtual Machine): <https://datapub.fz-juelich.de/slts/>
 
 ## TSMP-PDAF
+
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
 
 Commands for cloning TSMP-PDAF (https or ssh):
 ```bash

@@ -1,5 +1,13 @@
 # Input files for CLM #
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 For executing TSMP-PDAF, the standard CLM input file `lnd.stdin` is
 replaced by separate input files for the individual CLM realisations.
 The naming convention for these input files is a user defined prefix

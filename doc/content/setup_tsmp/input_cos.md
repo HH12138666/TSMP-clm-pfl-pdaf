@@ -1,5 +1,13 @@
 # Input files for COSMO #
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 Currently, different COSMO realizations share the same input namelist
 files (`INPUT_`), except the namelist file for input/output
 specifications (`INPUT_IO`). The `INPUT_IO` namelist file names for

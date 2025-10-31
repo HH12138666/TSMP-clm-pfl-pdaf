@@ -1,5 +1,13 @@
 # Structure of TSMP #
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 After cloning TSMP into a directory, for example `TSMP`, you obtain a fixed top level folder structure. This folder structured is discussed in this section.
 
 ## Component model directories and PDAF directory ##

@@ -1,5 +1,13 @@
 # TSMP-PDAF Preprocessor variables #
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 A number of preprocessor variables are set during the build process of
 TSMP-PDAF in order to make the code behave in specific ways.
 

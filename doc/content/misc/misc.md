@@ -1,5 +1,13 @@
 # Misc #
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 Various topics related to TSMP-PDAF.
 
 ## Gitlab: TSMP-PDAF group ##

@@ -1,5 +1,13 @@
 # JUBE with TSMP
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 JUBE (<https://apps.fz-juelich.de/jsc/jube/jube2/docu/>) is a JSC-developed tool to set up and analyze reproducible benchmarks. To set it up, JUBE must be installed on the system and configured with an *XML* or *YAML* file.
 
 HPSCTerrSys has configured an XML file that enables JUBE-benchmarks with the available test cases of TSMP. Currently, the file is located at <https://gitlab.jsc.fz-juelich.de/sdlts/benchmarking/tsmp_jube>. Please ask for access if you want to use it.

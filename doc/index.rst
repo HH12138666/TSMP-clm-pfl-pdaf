@@ -5,6 +5,14 @@
 Welcome to TSMP documentation!
 ==============================
 
+.. danger::
+   **DEPRECATED**: This documentation is deprecated and no longer maintained.
+   Please refer to the updated documentation for current information.
+
+   - TSMP2: https://hpscterrsys.github.io/TSMP2
+   - TSMP-PDAF: https://hpscterrsys.github.io/pdaf
+
+
 .. toctree::
    :maxdepth: 3
    :caption: Introduction:

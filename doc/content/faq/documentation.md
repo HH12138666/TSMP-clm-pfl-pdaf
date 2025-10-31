@@ -1,5 +1,14 @@
 # Contribute to TSMP documentation.
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
+
 The quickest and easiest way to contribute to this documentation is to click on 
 the `Edit on GitHub` button in the top right corner of each subpage. Clicking 
 this button will forward you to the specific document (`.md` or `.rst` file) on 

@@ -1,5 +1,13 @@
 # Input files for OASIS-MCT #
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 When the component models of TSMP are coupled via OASIS-MCT, certain
 input files for the coupler need to be provided for a regular TSMP run.
 These files are principally the same for the execution of TSMP-PDAF and

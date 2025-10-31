@@ -1,5 +1,13 @@
 # Setup Examples #
 
+```{danger}
+**DEPRECATED**: This documentation is deprecated and no longer maintained. 
+Please refer to the updated documentation for current information.
+
+   - TSMP2: <https://hpscterrsys.github.io/TSMP2>
+   - TSMP-PDAF: <https://hpscterrsys.github.io/pdaf>
+```
+
 This Section need to be revised! Please take a look into the
 [FallSchool
 setup/configuration](https://gitlab.jsc.fz-juelich.de/sdlts/FallSchool_HPSC_TerrSys)
