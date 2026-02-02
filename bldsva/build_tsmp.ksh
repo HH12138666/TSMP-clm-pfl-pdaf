@@ -186,6 +186,10 @@ setCombination(){
 
        mListgen="clm5-cos5-pfl-pdaf"
 
+     elif echo "$combination" | grep -q 'clm' && echo "$combination" | grep -q 'pfl' && ! echo "$combination" | grep -q 'cos' && ! echo "$combination" | grep -q 'icon'; then
+
+       mListgen="clm3-pfl-pdaf"
+
      else
 
        if echo "$combination" | grep -q 'cos4'; then
@@ -223,13 +227,46 @@ setCombination(){
 
   version=$mListgen
   set -A mList ${modelVersion[$mListgen]}
-  if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${combination} ; fi
-  if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${combination} ; fi
-  if [[ $icondir == "" ]] then ; icondir=$rootdir/${mList[2]}_${platform}_${combination} ; fi
-  if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${combination} ; fi
-  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${combination} ; fi
+
+  has_atm="false"
+  if echo "$combination" | grep -q 'cos' || echo "$combination" | grep -q 'icon'; then
+    has_atm="true"
+  fi
+
+  idx_oas=0
+  idx_clm=1
+  if [[ $has_atm == "true" ]]; then
+    idx_atm=2
+    idx_pfl=3
+    idx_da=4
+  else
+    idx_atm=-1
+    idx_pfl=2
+    idx_da=3
+  fi
+
+  oas_model=${mList[$idx_oas]}
+  clm_model=${mList[$idx_clm]}
+  if [[ $idx_atm -ge 0 ]]; then
+    atm_model=${mList[$idx_atm]}
+  else
+    atm_model=""
+  fi
+  pfl_model=${mList[$idx_pfl]}
+  da_model=""
+  if echo "$combination" | grep -q 'pdaf'; then
+    da_model=${mList[$idx_da]}
+  fi
+
+  if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${oas_model}_${platform}_${combination} ; fi
+  if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${clm_model}_${platform}_${combination} ; fi
+  if [[ $has_atm == "true" ]]; then
+    if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${atm_model}_${platform}_${combination} ; fi
+    if [[ $icondir == "" ]] then ; icondir=$rootdir/${atm_model}_${platform}_${combination} ; fi
+  fi
+  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${pfl_model}_${platform}_${combination} ; fi
 #DA
-  if [[ $dadir == "" ]] then ;  dadir=$rootdir/${mList[4]}_${platform}_${combination} ; fi  
+  if [[ $dadir == "" && $da_model != "" ]] then ;  dadir=$rootdir/${da_model}_${platform}_${combination} ; fi  
   if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${combination} ;  fi 
 
   withOAS="false"
@@ -376,7 +413,7 @@ route "${cyellow}< c_compileOasis${cnormal}"
 compileParflow(){
 route "${cyellow}> c_compileParflow${cnormal}"
   comment "  source pfl interface script"
-    . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/build_interface_${mList[3]}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/intf_oas3/${pfl_model}/arch/build_interface_${pfl_model}.ksh >> $log_file 2>> $err_file
   check
     always_pfl
     if [[ ${options["pfl"]} == "skip" ]] ; then ; route "${cyellow}< c_compileParflow${cnormal}" ;return  ;fi 
@@ -384,8 +421,8 @@ route "${cyellow}> c_compileParflow${cnormal}"
      comment "  clear pfl dir: $pfldir"
        if [ -d $pfldir ] ; then ; rm -rf $pfldir >> $log_file 2>> $err_file ;fi
      check
-     comment "  copy ${rootdir}/${mList[3]} to $pfldir"
-       if [ -d ${rootdir}/${mList[3]} ] ;then ; cp -rf ${rootdir}/${mList[3]} $pfldir >> $log_file 2>> $err_file ;fi
+     comment "  copy ${rootdir}/${pfl_model} to $pfldir"
+       if [ -d ${rootdir}/${pfl_model} ] ;then ; cp -rf ${rootdir}/${pfl_model} $pfldir >> $log_file 2>> $err_file ;fi
      check
     fi
     if [[ ${options["pfl"]} == "build" || ${options["pfl"]} == "fresh" ]] ; then
@@ -406,7 +443,7 @@ route "${cyellow}< c_compileParflow${cnormal}"
 compileDA(){
 route "${cyellow}> c_compileDA${cnormal}"
   comment "  source da interface script"
-    . ${rootdir}/bldsva/intf_DA/${mList[4]}/arch/build_interface_${mList[4]}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/intf_DA/${da_model}/arch/build_interface_${da_model}.ksh >> $log_file 2>> $err_file
   check
     always_da
     if [[ ${options["da"]} == "skip" ]] ; then ; route "${cyellow}< c_compileDA${cnormal}" ;return  ;fi 
@@ -414,8 +451,8 @@ route "${cyellow}> c_compileDA${cnormal}"
   comment "  clear da dir: $dadir"
       rm -rf $dadir >> $log_file 2>> $err_file
   check
-  comment "  backup ${rootdir}/${mList[4]} to $dadir"
-      cp -rf ${rootdir}/${mList[4]} $dadir >> $log_file 2>> $err_file
+  comment "  backup ${rootdir}/${da_model} to $dadir"
+      cp -rf ${rootdir}/${da_model} $dadir >> $log_file 2>> $err_file
   check
     fi  
     if [[ ${options["da"]} == "build" || ${options["da"]} == "fresh" ]] ; then
@@ -575,11 +612,11 @@ printState(){
   print "${cred}(10)${cnormal} bin dir (default=$def_rootdir/bin/${platform}_${version}_${combination}): ${cgreen}$bindir ${cnormal}"
   print "${cred}(11)${cnormal} oasis dir (default=$def_rootdir/${mList[0]}_${platform}_${version}_$combination): ${cgreen}$oasdir ${cnormal}"
   print "${cred}(12)${cnormal} clm dir (default=$def_rootdir/${mList[1]}_${platform}_${version}_$combination): ${cgreen}$clmdir ${cnormal}"
-  print "${cred}(13)${cnormal} cosmo dir (default=$def_rootdir/${mList[2]}_${platform}_${version}_$combination): ${cgreen}$cosdir ${cnormal}"
-  print "${cred}(30)${cnormal} icon dir (default=$def_rootdir/${mList[2]}_${platform}_${version}_$combination): ${cgreen}$icondir ${cnormal}"
-  print "${cred}(14)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${platform}_${version}_$combination): ${cgreen}$pfldir ${cnormal}"
+  print "${cred}(13)${cnormal} cosmo dir (default=$def_rootdir/${atm_model}_${platform}_${version}_$combination): ${cgreen}$cosdir ${cnormal}"
+  print "${cred}(30)${cnormal} icon dir (default=$def_rootdir/${atm_model}_${platform}_${version}_$combination): ${cgreen}$icondir ${cnormal}"
+  print "${cred}(14)${cnormal} parflow dir (default=$def_rootdir/${pfl_model}_${platform}_${version}_$combination): ${cgreen}$pfldir ${cnormal}"
 #DA
-  print "${cred}(15)${cnormal} data assimilation dir (default=$def_rootdir/${mList[4]}_${platform}_${version}_$combination): ${cgreen}$dadir ${cnormal}"
+  print "${cred}(15)${cnormal} data assimilation dir (default=$def_rootdir/${da_model}_${platform}_${version}_$combination): ${cgreen}$dadir ${cnormal}"
   print ""
   print "${cred}(16)${cnormal} mpi path (default=$defaultMpiPath): ${cgreen}$mpiPath ${cnormal}"
   print "${cred}(17)${cnormal} silo path (default=$defaultSiloPath): ${cgreen}$siloPath ${cnormal}"
@@ -828,30 +865,30 @@ getGitInfo(){
     echo "" >> $log_file
   fi
   if [[ $withPFL == "true" ]] ; then
-    echo "Git (${mList[3]}):" >> $log_file
-    comment "  Log Git information (${mList[3]})"
-    if [ -d "${rootdir}/${mList[3]}/.git" ]; then
-      echo "root dir: $(git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir)" >> $log_file
-      echo "remote url: $(git -C ${rootdir}/${mList[3]} remote get-url origin || echo "Remote origin not set for ${mList[3]}")" >> $log_file
-      echo "commit: $(git -C ${rootdir}/${mList[3]} log --pretty=format:'%H' -n 1)" >> $log_file
-      echo "tag: $(git -C ${rootdir}/${mList[3]} describe  --tags --dirty --always)" >> $log_file
+    echo "Git (${pfl_model}):" >> $log_file
+    comment "  Log Git information (${pfl_model})"
+    if [ -d "${rootdir}/${pfl_model}/.git" ]; then
+      echo "root dir: $(git -C ${rootdir}/${pfl_model} rev-parse --absolute-git-dir)" >> $log_file
+      echo "remote url: $(git -C ${rootdir}/${pfl_model} remote get-url origin || echo "Remote origin not set for ${pfl_model}")" >> $log_file
+      echo "commit: $(git -C ${rootdir}/${pfl_model} log --pretty=format:'%H' -n 1)" >> $log_file
+      echo "tag: $(git -C ${rootdir}/${pfl_model} describe  --tags --dirty --always)" >> $log_file
     else
-      echo "${mList[3]} is NOT a git repo" >> $log_file
-      echo "root dir: ${rootdir}/${mList[3]}" >> $log_file
+      echo "${pfl_model} is NOT a git repo" >> $log_file
+      echo "root dir: ${rootdir}/${pfl_model}" >> $log_file
     fi
     check
     echo "" >> $log_file
   fi
   if [[ $withPDAF == "true" ]] ; then
-    echo "Version (${mList[4]}):" >> $log_file
-    comment "  Log version information (${mList[4]})"
-      echo ${rootdir}/${mList[4]} >> $log_file
+    echo "Version (${da_model}):" >> $log_file
+    comment "  Log version information (${da_model})"
+      echo ${rootdir}/${da_model} >> $log_file
       # PDAF-version >= v2.0
-      if [[ -f ${rootdir}/${mList[4]}/src/PDAF_print_version.F90 ]] ; then
-	cat ${rootdir}/${mList[4]}/src/PDAF_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      if [[ -f ${rootdir}/${da_model}/src/PDAF_print_version.F90 ]] ; then
+	cat ${rootdir}/${da_model}/src/PDAF_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
       # PDAF-version v1.*
       else
-	cat ${rootdir}/${mList[4]}/src/PDAF-D_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+	cat ${rootdir}/${da_model}/src/PDAF-D_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
       fi
     check
     echo "" >> $log_file
@@ -1078,5 +1115,3 @@ printf "$platform\n$profiling\n$optComp\n$compiler\n$version\n$rootdir$bindir\n$
   print ${cgreen}"build script finished sucessfully"${cnormal}
   print "Rootdir: ${rootdir}"
   print "Bindir: ${bindir}"
-
-

@@ -7,13 +7,20 @@ route "${cyellow}<< always_pfl${cnormal}"
 
 configure_pfl(){
 route "${cyellow}>> configure_pfl${cnormal}"
+    # ParFlow 安装目录与构建目录
     export PARFLOW_INS="$pfldir/bin"
     export PARFLOW_BLD="$pfldir/build"
 #    export PFV="oas-gpu"
+    # GPU 情况下 RMM 目录
     export RMM_ROOT=$pfldir/rmm
 #
-    C_FLAGS="-fopenmp -Wall -Werror"
+    # C 编译参数与 CMake 选项集合
+    C_FLAGS="-fopenmp"
+    if [[ $compiler == "Gnu" ]]; then
+      C_FLAGS+=" -fcommon"
+    fi
     flagsSim="  -DMPIEXEC_EXECUTABLE=$(which srun)"
+    # 根据耦合情况选择 AMPS 通信层
     if [[ $withOAS == "true" ]]; then
         flagsSim+=" -DPARFLOW_AMPS_LAYER=oas3"
     else
@@ -23,17 +30,32 @@ route "${cyellow}>> configure_pfl${cnormal}"
         flagsSim+=" -DPARFLOW_AMPS_LAYER=mpi1"
       fi
     fi
+    # 依赖库与构建设置
     flagsSim+=" -DOAS3_ROOT=$oasdir/$platform"
     flagsSim+=" -DSILO_ROOT=$siloPath"
     flagsSim+=" -DHYPRE_ROOT=$hyprePath"
-    flagsSim+=" -DCMAKE_C_FLAGS=$C_FLAGS"
     flagsSim+=" -DCMAKE_BUILD_TYPE=Release"
     flagsSim+=" -DPARFLOW_ENABLE_TIMING=TRUE"
     flagsSim+=" -DCMAKE_INSTALL_PREFIX=$PARFLOW_INS"
+    # NetCDF C/Fortran 路径
+    flagsSim+=" -DCMAKE_PREFIX_PATH=$ncdfPath"
+    flagsSim+=" -DCMAKE_LIBRARY_PATH=$ncdfPath/lib"
+    flagsSim+=" -DCMAKE_INCLUDE_PATH=$ncdfPath/include"
     flagsSim+=" -DNETCDF_DIR=$ncdfPath"
     flagsSim+=" -DNETCDF_Fortran_ROOT=$ncdfPath"
+    flagsSim+=" -DNETCDF_INCLUDE_DIR=$ncdfPath/include"
+    flagsSim+=" -DNETCDF_LIBRARY=$ncdfPath/lib/libnetcdf.so"
+    flagsSim+=" -DNETCDF_Fortran_INCLUDE_DIR=$ncdfPath/include"
+    flagsSim+=" -DNETCDF_Fortran_LIBRARY=$ncdfPath/lib/libnetcdff.so"
+    # Tcl 与 AMPS I/O 模式
     flagsSim+=" -DTCL_TCLSH=$tclPath/bin/tclsh8.6"
     flagsSim+=" -DPARFLOW_AMPS_SEQUENTIAL_IO=on"
+    # Fortran include/兼容参数
+    pfl_fflags="-I$ncdfPath/include"
+    if [[ $compiler == "Gnu" ]]; then
+      pfl_fflags+=" -fallow-argument-mismatch"
+    fi
+    # PDAF 模式关闭 SLURM hooks
     if [[ $withPDAF == "true" ]] ; then
       # PDAF:
       # Turn off SLURM for PDAF due to error
@@ -43,7 +65,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
     else
       flagsSim+=" -DPARFLOW_ENABLE_SLURM=TRUE"
     fi
-	# Define compilers
+	# 选择编译器（可选 Scalasca 包装）
     if [[ $profiling == "scalasca" ]]; then
       pcc="scorep-mpicc"
       pfc="scorep-mpif90"
@@ -57,6 +79,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
       pcxx="$mpiPath/bin/mpic++"
     fi
 #
+    # 创建安装/构建目录
     comment "    add parflow paths $PARFLOW_INS, $PARFLOW_BLD "
      mkdir -p $PARFLOW_INS
      mkdir -p $PARFLOW_BLD
@@ -64,6 +87,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
 
     comment " parflow is configured for $processor "
     check
+    # GPU/加速器构建分支
     if [[ $processor == "GPU"|| $processor == "MSA" ]]; then
        cd $pfldir
        comment "module load CUDA  mpi-settings/CUDA "
@@ -95,6 +119,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
        check
     fi
 
+    # 执行通用配置（CMake）
     c_configure_pfl
 
 route "${cyellow}<< configure_pfl${cnormal}"
@@ -102,6 +127,7 @@ route "${cyellow}<< configure_pfl${cnormal}"
 
 make_pfl(){
 route "${cyellow}>> make_pfl${cnormal}"
+  # 执行通用编译/安装
   c_make_pfl
 route "${cyellow}<< make_pfl${cnormal}"
 }
@@ -110,11 +136,8 @@ route "${cyellow}<< make_pfl${cnormal}"
 substitutions_pfl(){
 route "${cyellow}>> substitutions_pfl${cnormal}"
 
+  # 执行通用补丁/替换逻辑
   c_substitutions_pfl
 
 route "${cyellow}<< substitutions_pfl${cnormal}"
 }
-
-
-
-

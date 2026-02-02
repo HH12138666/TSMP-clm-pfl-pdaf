@@ -7,10 +7,17 @@ route "${cyellow}<< always_clm${cnormal}"
 
 configure_clm(){
 route "${cyellow}>> configure_clm${cnormal}"
+  fflags_extra=""
+  if [[ $compiler == "Gnu" ]]; then
+    fflags_extra="-fallow-argument-mismatch -fallow-invalid-boz"
+    export FFLAGS="$fflags_extra $FFLAGS"
+    export FCFLAGS="$fflags_extra $FCFLAGS"
+    export USER_FFLAGS="$fflags_extra $USER_FFLAGS"
+  fi
   cplLib="-lnetcdff "
   flags=""
   ccc="$profComp $mpiPath/bin/mpicc "
-  cfc="$profComp $mpiPath/bin/mpif90 "
+  cfc="$profComp $mpiPath/bin/mpif90 $fflags_extra "
   if [[ $profiling == "scalasca" ]]; then
     ccc="scorep-mpicc "
     cfc="scorep-mpif90 "
@@ -64,4 +71,3 @@ route "${cyellow}>> substitutions_clm${cnormal}"
   check
 route "${cyellow}<< substitutions_clm${cnormal}"
 }
-

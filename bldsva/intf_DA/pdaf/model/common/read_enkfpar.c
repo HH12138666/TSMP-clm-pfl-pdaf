@@ -182,7 +182,12 @@ void read_enkfpar(char *parname)
   }else{
     sprintf(pfinfile,"%s_%05d/%s_%05d",pfprefixin,coupcol,pfproblemname,coupcol);
   }
-  sprintf(clminfile,"%s_%05d",clminfile,coupcol);
+  /* Avoid in-place sprintf on the same buffer (undefined behavior) */
+  {
+    char tmp_clm[200];
+    snprintf(tmp_clm, sizeof(tmp_clm), "%s_%05d", clminfile, coupcol);
+    strcpy(clminfile, tmp_clm);
+  }
   oasprefixno  = coupcol;
   clmprefixlen = (int)strlen(clminfile);
 

@@ -142,6 +142,19 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   USE, INTRINSIC :: iso_c_binding
 
   IMPLICIT NONE
+
+  interface
+    subroutine mpi_bcast(buf, count, datatype, root, comm, ierr)
+      use iso_c_binding
+      type(*), dimension(*) :: buf
+      integer :: count, datatype, root, comm, ierr
+    end subroutine mpi_bcast
+    subroutine mpi_allreduce(sendbuf, recvbuf, count, datatype, op, comm, ierr)
+      use iso_c_binding
+      type(*), dimension(*) :: sendbuf, recvbuf
+      integer :: count, datatype, op, comm, ierr
+    end subroutine mpi_allreduce
+  end interface
   ! !ARGUMENTS:
   INTEGER, INTENT(in)  :: step      ! Current time step
   INTEGER, INTENT(out) :: dim_obs_f ! Dimension of full observation vector
@@ -156,6 +169,8 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   integer :: ierror
   INTEGER :: max_var_id         ! Multi-scale DA
   INTEGER :: sum_dim_obs_p
+  INTEGER :: dim_obs_p_buf(1)
+  INTEGER :: sum_dim_obs_p_buf(1)
   INTEGER :: c                ! CLM Column index
   INTEGER :: g                ! CLM Gridcell index
   INTEGER :: cg
@@ -249,7 +264,9 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 
      call mpi_bcast(dampfac_state_time_dependent_in, 1, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
      if (screen > 2) then
-       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: dampfac_state_time_dependent_in=", dampfac_state_time_dependent_in
+       print *, "TSMP-PDAF mype(w)=", mype_world, &
+            ": init_dim_obs_pdaf: dampfac_state_time_dependent_in=", &
+            dampfac_state_time_dependent_in
      end if
 
      ! Set C-version of dampfac_state_time_dependent with value read from obsfile
@@ -275,7 +292,9 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 
      call mpi_bcast(dampfac_param_time_dependent_in, 1, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
      if (screen > 2) then
-       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: dampfac_param_time_dependent_in=", dampfac_param_time_dependent_in
+       print *, "TSMP-PDAF mype(w)=", mype_world, &
+            ": init_dim_obs_pdaf: dampfac_param_time_dependent_in=", &
+            dampfac_param_time_dependent_in
      end if
 
      ! Set C-version of dampfac_param_time_dependent with value read from obsfile
@@ -364,8 +383,8 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
      call mpi_bcast(z_idx_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
      if(point_obs.eq.0) call mpi_bcast(var_id_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
      if(obs_interp_switch .eq. 1) then
-         call mpi_bcast(x_idx_interp_d_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
-         call mpi_bcast(y_idx_interp_d_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
+         call mpi_bcast(x_idx_interp_d_obs_nc, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
+         call mpi_bcast(y_idx_interp_d_obs_nc, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
      end if
   !end if
 #endif
@@ -515,8 +534,10 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   ! ------------------------------------
 
   ! add and broadcast size of PE-local observation dimensions using mpi_allreduce
-  call mpi_allreduce(dim_obs_p, sum_dim_obs_p, 1, MPI_INTEGER, MPI_SUM, &
-       comm_filter, ierror) 
+  dim_obs_p_buf(1) = dim_obs_p
+  call mpi_allreduce(dim_obs_p_buf, sum_dim_obs_p_buf, 1, MPI_INTEGER, MPI_SUM, &
+       comm_filter, ierror)
+  sum_dim_obs_p = sum_dim_obs_p_buf(1)
 
   ! Set dimension of full observation vector
   dim_obs_f = sum_dim_obs_p
@@ -651,8 +672,8 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 
   ! collect values from all PEs, by adding all PE-local arrays (works
   ! since only the subsection belonging to a specific PE is non-zero)
-  call mpi_allreduce(MPI_IN_PLACE,obs_pdaf2nc,dim_obs,MPI_INTEGER,MPI_SUM,comm_filter,ierror)
-  call mpi_allreduce(MPI_IN_PLACE,obs_nc2pdaf,dim_obs,MPI_INTEGER,MPI_SUM,comm_filter,ierror)
+  call mpi_allreduce(obs_pdaf2nc, obs_pdaf2nc, dim_obs, MPI_INTEGER, MPI_SUM, comm_filter, ierror)
+  call mpi_allreduce(obs_nc2pdaf, obs_nc2pdaf, dim_obs, MPI_INTEGER, MPI_SUM, comm_filter, ierror)
 
   if (mype_filter==0 .and. screen > 2) then
       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: obs_pdaf2nc=", obs_pdaf2nc
@@ -806,25 +827,33 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
                  ! First: ix and iy smaller than observation location
                  if (idx_obs_nc(i) .eq. idx_map_subvec2state_fortran(j)) then
                      obs_interp_indices_p(cnt, 1) = j
-                     obs_interp_weights_p(cnt, 1) = sqrt(abs(x_idx_interp_d_obs_nc(i)) * abs(x_idx_interp_d_obs_nc(i)) + abs(y_idx_interp_d_obs_nc(i)) * abs(y_idx_interp_d_obs_nc(i)))
+                    obs_interp_weights_p(cnt, 1) = sqrt( &
+                        abs(x_idx_interp_d_obs_nc(i)) * abs(x_idx_interp_d_obs_nc(i)) + &
+                        abs(y_idx_interp_d_obs_nc(i)) * abs(y_idx_interp_d_obs_nc(i)) )
                      cnt_interp = cnt_interp + 1
                  end if
                  ! Second: ix larger than observation location, iy smaller
                  if (idx_obs_nc(i) + 1 .eq. idx_map_subvec2state_fortran(j)) then
                      obs_interp_indices_p(cnt, 2) = j
-                     obs_interp_weights_p(cnt, 2) = sqrt(abs(1.0-x_idx_interp_d_obs_nc(i)) * abs(1.0-x_idx_interp_d_obs_nc(i)) + abs(y_idx_interp_d_obs_nc(i)) * abs(y_idx_interp_d_obs_nc(i)))
+                    obs_interp_weights_p(cnt, 2) = sqrt( &
+                        abs(1.0 - x_idx_interp_d_obs_nc(i)) * abs(1.0 - x_idx_interp_d_obs_nc(i)) + &
+                        abs(y_idx_interp_d_obs_nc(i)) * abs(y_idx_interp_d_obs_nc(i)) )
                      cnt_interp = cnt_interp + 1
                  end if
                  ! Third: ix smaller than observation location, iy larger
                  if (idx_obs_nc(i) + nx_glob .eq. idx_map_subvec2state_fortran(j)) then
                      obs_interp_indices_p(cnt, 3) = j
-                     obs_interp_weights_p(cnt, 3) = sqrt(abs(x_idx_interp_d_obs_nc(i)) * abs(x_idx_interp_d_obs_nc(i)) + abs(1.0-y_idx_interp_d_obs_nc(i)) * abs(1.0-y_idx_interp_d_obs_nc(i)))
+                    obs_interp_weights_p(cnt, 3) = sqrt( &
+                        abs(x_idx_interp_d_obs_nc(i)) * abs(x_idx_interp_d_obs_nc(i)) + &
+                        abs(1.0 - y_idx_interp_d_obs_nc(i)) * abs(1.0 - y_idx_interp_d_obs_nc(i)) )
                      cnt_interp = cnt_interp + 1
                  end if
                  ! Fourth: ix and iy larger than observation location
                  if (idx_obs_nc(i) + nx_glob + 1 .eq. idx_map_subvec2state_fortran(j)) then
                      obs_interp_indices_p(cnt, 4) = j
-                     obs_interp_weights_p(cnt, 4) = sqrt(abs(1.0-x_idx_interp_d_obs_nc(i)) * abs(1.0-x_idx_interp_d_obs_nc(i)) + abs(1.0-y_idx_interp_d_obs_nc(i)) * abs(1.0-y_idx_interp_d_obs_nc(i)))
+                    obs_interp_weights_p(cnt, 4) = sqrt( &
+                        abs(1.0 - x_idx_interp_d_obs_nc(i)) * abs(1.0 - x_idx_interp_d_obs_nc(i)) + &
+                        abs(1.0 - y_idx_interp_d_obs_nc(i)) * abs(1.0 - y_idx_interp_d_obs_nc(i)) )
                      cnt_interp = cnt_interp + 1
                  end if
                  ! Check if all four corners are found
@@ -1062,4 +1091,3 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   call clean_obs_nc()
 
 END SUBROUTINE init_dim_obs_f_pdaf
-

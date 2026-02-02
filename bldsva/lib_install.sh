@@ -162,7 +162,7 @@ if [ $? -ne 0 ]; then
     echo "Silo can not be downloaded!!!check wget command"
     exit
 fi
-tar -xvf 4.10.2.tar.gz >> $log_file 2>> $err_file
+tar -xvf 4.11.tar.gz >> $log_file 2>> $err_file
 #*****
 pwget=`wget https://github.com/hypre-space/hypre/archive/refs/tags/v2.20.0.zip`
 if [ $? -ne 0 ]; then
@@ -240,24 +240,36 @@ echo "installing openmpi ........ "
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib:/usr/lib/x86_64-linux-gnu"
 env > $dlib/env.log
 #
-cd $dsrc/openmpi-*
-./configure  --prefix="$dlib/openmpi" --with-pmix=internal >> $log_file 2>> $err_file
-make -j 4 >> $log_file 2>> $err_file
-make install >> $log_file 2>> $err_file
+#***************** MPI *****************************************
+USE_SYSTEM_MPI=${USE_SYSTEM_MPI:-1}
+if [ "$USE_SYSTEM_MPI" = "1" ]; then
+    echo "Using system MPI (mpicc/mpif90/mpif77)"
+    export CC=$(command -v mpicc)
+    export FC=$(command -v mpif90)
+    export F77=$(command -v mpif77)
+    if [ -z "$CC" ] || [ -z "$FC" ]; then
+        echo "System MPI compilers not found in PATH (mpicc/mpif90)."
+        exit 1
+    fi
+else
+    cd $dsrc/openmpi-*
+    ./configure  --prefix="$dlib/openmpi" --with-pmix=internal >> $log_file 2>> $err_file
+    make -j 4 >> $log_file 2>> $err_file
+    make install >> $log_file 2>> $err_file
 
- export opnempi env vairable for installtion of other Apps
-
-export PATH="$dlib/openmpi/bin:$PATH"
-export CC=$dlib/openmpi/bin/mpicc
-export FC=$dlib/openmpi/bin/mpif90
-export F77=$dlib/openmpi/bin/mpif77
+    # export openmpi env variable for installation of other Apps
+    export PATH="$dlib/openmpi/bin:$PATH"
+    export CC=$dlib/openmpi/bin/mpicc
+    export FC=$dlib/openmpi/bin/mpif90
+    export F77=$dlib/openmpi/bin/mpif77
+fi
 
 #***************** HDF5 *****************************************
 echo "***********************************************************"
 echo "installing hdf5 in $dlib/hdf5 ......"
 #
 cd $dsrc/hdf5-*
-./configure --prefix=$dlib/hdf5 --enable-build-mode=production --enable-hl --enable-fortran  >> $log_file 2>> $err_file
+./configure --prefix=$dlib/hdf5 --enable-build-mode=production --enable-hl --enable-fortran --enable-parallel --enable-shared --enable-static >> $log_file 2>> $err_file
 make -j 4 >> $log_file 2>> $err_file
 make install   >> $log_file 2>> $err_file
 #
@@ -305,7 +317,7 @@ echo "installing silo in $dlib/silo ..."
 export FCFLAGS="-g -O2 -I$dlib/netcdf/include -I$dlib/hdf5/include -L$dlib/hdf5/lib -lhdf5_fortran -lhdf5"
 #
 cd $dsrc/Silo-*
-./configure --prefix=$dlib/silo --with-hdf5=$dlib/hdf5/include,$dlib/hdf5/lib --enable-fortran --enable-shared  >> $log_file 2>> $err_file
+./configure --prefix=$dlib/silo --with-hdf5=$dlib/hdf5/include,$dlib/hdf5/lib --enable-fortran --enable-shared >> $log_file 2>> $err_file
 make -j 4 >> $log_file 2>> $err_file
 make install  >> $log_file 2>> $err_file
 
@@ -314,7 +326,7 @@ echo "***********************************************************"
 echo "installing hypre in $dlib/hypre ..."
 #
 cd $dsrc/hypre-*/src
-./configure --prefix=$dlib/hypre --with-MPI-lib-dirs=/usr/bin/mpiexec  --enable-fortran --enable-shared >> $log_file 2>> $err_file
+./configure --prefix=$dlib/hypre --with-MPI --enable-fortran --enable-shared >> $log_file 2>> $err_file
 make -j 4 >> $log_file 2>> $err_file
 make install  >> $log_file 2>> $err_file
 
@@ -331,15 +343,22 @@ cd $dsrc/tcl*/unix
 ./configure --prefix=$dlib/tcl --enable-shared >> $log_file 2>> $err_file
 make -j 4 >> $log_file 2>> $err_file
 make install  >> $log_file 2>> $err_file
-ln -s $dlib/tcl/bin/tclsh8.5 $dlib/tcl/bin/tclsh  >> $log_file 2>> $err_file
+ln -sf $dlib/tcl/bin/tclsh8.6 $dlib/tcl/bin/tclsh  >> $log_file 2>> $err_file
 #
 
 #******************************* ecCodes *******************************
 echo "**************************************************************"
 echo "installing ecCodes in $dlib/eccodes ..."
-mkdir $dsrc/build
+mkdir -p $dsrc/build
 cd $dsrc/build
-cmake  ../eccodes-2.18.0-Source  -DCMAKE_INSTALL_PREFIX=$dlib/eccodes
+if [ ! -x "$CC" ]; then
+    if [ -x "$dlib/openmpi/bin/mpicc" ]; then
+        export CC="$dlib/openmpi/bin/mpicc"
+    else
+        export CC=`which gcc`
+    fi
+fi
+cmake  ../eccodes-2.18.0-Source  -DCMAKE_INSTALL_PREFIX=$dlib/eccodes -DCMAKE_C_COMPILER="$CC"
 make -j 4
 ctest
 make install
@@ -347,7 +366,9 @@ make install
 #******************************* PnetCDF *******************************
 echo "**************************************************************"
 echo "installing PnetCDF in $dlib/pnetcdf ..."
-cd $dsrc/pnetcdf*
+cd $dsrc/pnetcdf-1.12.1
+export FCFLAGS="-fallow-argument-mismatch"
+export FFLAGS="-fallow-argument-mismatch"
 ./configure --prefix=$dlib/pnetcdf 
 make -j 4
 make install

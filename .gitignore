@@ -3,11 +3,9 @@ doc/_build/**
 
 /bin/
 /run/
-/icon*/
-/clm3_5*/
-/clm5_0*/
-/cosmo4_21*/
-/cosmo5_1*/
-/oasis3-mct*/
-/parflow*/
-/pdaf*/
+/clm3_5_GENERIC_X86_clm3-pfl-pdaf/
+/oasis3-mct_GENERIC_X86_clm3-pfl-pdaf/
+/parflow_GENERIC_X86_clm3-pfl-pdaf/
+/pdaf_GENERIC_X86_clm3-pfl-pdaf/
+/tsmp_idealscal/
+/lib/

@@ -104,10 +104,14 @@ route "${cyellow}>> configure_oas${cnormal}"
     sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
   check
   comment "   sed comF90 to oas Makefile"
+    gfortran_mismatch=""
+    if [[ $compiler == "Gnu" ]] ; then
+      gfortran_mismatch="-fallow-argument-mismatch"
+    fi
     if [[ $profiling == "scalasca" ]]; then
-      sed -i "s@__comF90__@scorep-mpif90 $optComp@" $file >> $log_file 2>> $err_file
+      sed -i "s@__comF90__@scorep-mpif90 $optComp $gfortran_mismatch@" $file >> $log_file 2>> $err_file
     else
-      sed -i "s@__comF90__@${profComp} $mpiPath/bin/mpif90 $optComp@" $file >> $log_file 2>> $err_file
+      sed -i "s@__comF90__@${profComp} $mpiPath/bin/mpif90 $optComp $gfortran_mismatch@" $file >> $log_file 2>> $err_file
     fi
   check
   comment "   sed comCC to oas Makefile"
@@ -131,7 +135,11 @@ route "${cyellow}>> configure_oas${cnormal}"
     if [[ $compiler == "Intel" ]]; then
       sed -i "s@__precision__@-i4 -r8@" $file >> $log_file 2>> $err_file
     else
-      sed -i "s@__precision__@@" $file >> $log_file 2>> $err_file
+      sed -i "s@__precision__@-fdefault-real-8 -fdefault-double-8@" $file >> $log_file 2>> $err_file
+      # In case a stale file already has Intel flags, replace them for Gnu builds
+      sed -i "s@-i4 -r8@-fdefault-real-8 -fdefault-double-8@g" $file >> $log_file 2>> $err_file
+      # Clean up any invalid GNU integer flags if present
+      sed -i "s@-fdefault-integer-4 -fdefault-real-8@-fdefault-real-8 -fdefault-double-8@g" $file >> $log_file 2>> $err_file
     fi
   check
 
@@ -143,5 +151,3 @@ route "${cyellow}>> make_oas${cnormal}"
   c_make_oas
 route "${cyellow}<< make_oas${cnormal}"
 }
-
-

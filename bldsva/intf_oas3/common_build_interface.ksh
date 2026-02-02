@@ -21,6 +21,7 @@
 
 c_configure_icon(){
 route "${cyellow}>>> c_configure_icon${cnormal}"
+  # 配置 ICON：替换 Makefile 里的耦合与平台参数
   file=$icondir/Makefile
   cplFlag=""
   cplLib=""
@@ -44,6 +45,7 @@ route "${cyellow}<<< c_configure_icon${cnormal}"
 
 c_make_icon(){
 route "${cyellow}>>> c_make_icon${cnormal}"
+  # 编译 ICON 并拷贝可执行文件
   comment "    cd to icon dir"
     cd $icondir >> $log_file 2>> $err_file
   check
@@ -67,6 +69,7 @@ route "${cyellow}<<< c_make_icon${cnormal}"
 
 c_substitutions_icon(){
 route "${cyellow}>>> c_substitutions_icon${cnormal}"
+  # ICON 源码替换/补丁（OAS/TSMP 接口）
 if [[ $withOAS == "true" ]]; then
   comment "    copy oas3 interface to icon/src "
     cp -R $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $icondir/src >> $log_file 2>> $err_file
@@ -148,6 +151,7 @@ route "${cyellow}<<< c_substitutions_icon${cnormal}"
 
 c_configure_cos(){
 route "${cyellow}>>> c_configure_cos${cnormal}"
+  # 配置 COSMO：替换 Makefile、清理并准备编译
   comment "    cd to cosmo dir"
     cd $cosdir >> $log_file 2>> $err_file
   check
@@ -174,6 +178,7 @@ route "${cyellow}<<< c_configure_cos${cnormal}"
 
 c_make_cos(){
 route "${cyellow}>>> c_make_cos${cnormal}"
+  # 编译 COSMO；PDAF 模式下打包库，否则拷贝二进制
   comment "    cd to cosmo dir"
     cd $cosdir >> $log_file 2>> $err_file
   check
@@ -206,6 +211,7 @@ route "${cyellow}<<< c_make_cos${cnormal}"
 c_substitutions_cos(){
 
 route "${cyellow}>>> c_substitutions_cos${cnormal}"
+  # COSMO 源码补丁（OAS/TSMP 接口及 PDAF 修正）
 
   comment "    copy oas3 interface to cosmo/src "
     patch $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $cosdir/src 
@@ -313,6 +319,7 @@ route "${cyellow}<<< c_substitutions_cos${cnormal}"
 
 c_configure_oas(){
 route "${cyellow}>>> c_configure_oas${cnormal}"
+  # 配置 OASIS3-MCT：替换 Makefile 并清理
   comment "    sed oasis rootdir to Makefile"
     sed -i "s@__oasisroot__@$oasdir@" $file >> $log_file 2>> $err_file
   check
@@ -327,6 +334,7 @@ route "${cyellow}<<< c_configure_oas${cnormal}"
 
 c_make_oas(){
 route "${cyellow}>>> c_make_oas${cnormal}"
+  # 编译 OASIS3-MCT，并在 PDAF 模式下复制库
   comment "    make oasis"
     export SCOREP_WRAPPER=on
     make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
@@ -343,6 +351,17 @@ route "${cyellow}<<< c_make_oas${cnormal}"
 
 c_substitutions_oas(){
 route "${cyellow}>>> c_substitutions_oas${cnormal}"
+  # OASIS 源码替换（含 PDAF 对 OASIS 的补丁）
+  if [[ ! -f ${oasdir}/util/make_dir/make.inc ]]; then
+    comment "    create make.inc from template"
+    if [[ -f ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/config/make.inc ]]; then
+      cp ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/config/make.inc ${oasdir}/util/make_dir/make.inc >> $log_file 2>> $err_file
+      check
+    else
+      touch ${oasdir}/util/make_dir/make.inc >> $log_file 2>> $err_file
+      check
+    fi
+  fi
   comment "    sed absolut include paths to Makefile"
     sed -i "s@include make.inc@include $oasdir/util/make_dir/make.inc@" ${oasdir}/util/make_dir/TopMakefileOasis3 >> $log_file 2>> $err_file
   check
@@ -372,6 +391,7 @@ route "${cyellow}<<< c_substitutions_oas${cnormal}"
 
 c_configure_clm(){
 route "${cyellow}>>> c_configure_clm${cnormal}"
+  # 配置 CLM：准备 Makefile 与编译参数
   comment "    clean clm by removing build dir"
     rm -rf $clmdir/build >> $log_file 2>> $err_file
   check
@@ -418,16 +438,34 @@ route "${cyellow}>>> c_configure_clm${cnormal}"
   check
   cppdef=""			# add "-DWATSAT3D" for input of "watsat3d" in "iniTimeConst.F90"
   if [ $cplscheme == "true" ] && [ $withICON == "false" ] ; then ; cppdef+=" -DCPL_SCHEME_F " ; fi
+  fflags_extra=""
+  if [[ $compiler == "Gnu" ]]; then
+    fflags_extra="-fallow-argument-mismatch -fallow-invalid-boz"
+  fi
   comment "    configure clm"
-  comment "    $clmdir/bld/configure -fc $cfc -cc $ccc $flags -fflags $cplInc -ldflags $cplLib -fopt $optComp -cppdefs $cppdef"
+  comment "    $clmdir/bld/configure -fc $cfc -cc $ccc $flags -fflags $cplInc $fflags_extra -ldflags $cplLib -fopt $optComp -cppdefs $cppdef"
     export SCOREP_WRAPPER=off
-    $clmdir/bld/configure -fc "$cfc" -cc "$ccc" $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" -cppdefs "$cppdef"  >> $log_file 2>> $err_file
+    $clmdir/bld/configure -fc "$cfc" -cc "$ccc" $flags -fflags "$cplInc $fflags_extra" -ldflags "$cplLib" -fopt "$optComp" -cppdefs "$cppdef"  >> $log_file 2>> $err_file
   check
+  if [[ $compiler == "Gnu" ]]; then
+    if [[ -f $clmdir/build/Makefile ]]; then
+      comment "    ensure GNU extra flags in USER_FFLAGS"
+      if ! grep -q "fallow-argument-mismatch" $clmdir/build/Makefile ; then
+        sed -i '/^USER_FFLAGS/ {/fallow-argument-mismatch/! s@$@ -fallow-argument-mismatch@}' $clmdir/build/Makefile >> $log_file 2>> $err_file
+        check
+      fi
+      if ! grep -q "fallow-invalid-boz" $clmdir/build/Makefile ; then
+        sed -i '/^USER_FFLAGS/ {/fallow-invalid-boz/! s@$@ -fallow-invalid-boz@}' $clmdir/build/Makefile >> $log_file 2>> $err_file
+        check
+      fi
+    fi
+  fi
 route "${cyellow}<<< c_configure_clm${cnormal}"
 }
 
 c_make_clm(){
 route "${cyellow}>>> c_make_clm${cnormal}"
+  # 编译 CLM 并打包库到输出目录
   comment "    cd to clm build"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
@@ -458,6 +496,7 @@ route "${cyellow}<<< c_make_clm${cnormal}"
 
 c_substitutions_clm(){
 route "${cyellow}>>> c_substitutions_clm${cnormal}"
+  # CLM 源码补丁（OAS/TSMP 接口与 PDAF 修改）
 # CLM 3.5 substitutions
   comment "    create oas3 dir in $clmdir/src"
     mkdir -p $clmdir/src/oas3 >> $log_file 2>> $err_file
@@ -489,6 +528,7 @@ route "${cyellow}<<< c_substitutions_clm${cnormal}"
 
 c_configure_eclm(){
 route "${cyellow}>>> c_configure_eclm${cnormal}"
+  # 配置 eCLM（CMake 方式）
   comment "    Using land component model eCLM (experimental) \n"
   comment "    Checking if eCLM repo is valid"
   cd ${clmdir}
@@ -520,6 +560,7 @@ route "${cyellow}<<< c_configure_eclm${cnormal}"
 
 c_make_eclm(){
 route "${cyellow}>>> c_make_eclm${cnormal}"
+  # 编译并安装 eCLM
   comment "    Building eCLM (this will take approximately 30 mins)..."
   timer_start=$(date +%s)
   cmake --build "$ECLM_BUILD_DIR" >> $log_file 2>> $err_file
@@ -537,6 +578,7 @@ route "${cyellow}<<< c_make_eclm${cnormal}"
 
 c_substitutions_eclm(){
 route "${cyellow}>>> c_substitutions_eclm${cnormal}"
+  # eCLM 补丁占位（如需可扩展）
 route "${cyellow}<<< c_substitutions_eclm${cnormal}"
 }
 
@@ -549,6 +591,7 @@ route "${cyellow}<<< c_substitutions_eclm${cnormal}"
 
 c_configure_pfl(){
 route "${cyellow}>>> c_configure_pfl${cnormal}"
+  # 配置 ParFlow（CMake 参数与编译器）
 
   comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
@@ -557,16 +600,19 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
   export FC=$pfc
   export F77=$pf77
   export CXX=$pcxx
+  export CFLAGS="$C_FLAGS"
+  export CXXFLAGS="$C_FLAGS"
 
   comment "    configure pfsimulator and pftools"
   export SCOREP_WRAPPER=off
-  cmake ../ $flagsSim >> $log_file 2>> $err_file
+  cmake ../ $flagsSim -DCMAKE_Fortran_FLAGS="${pfl_fflags}" >> $log_file 2>> $err_file
   check
 route "${cyellow}<<< c_configure_pfl${cnormal}"
 }
 
 c_make_pfl(){
 route "${cyellow}>>> c_make_pfl${cnormal}"
+  # 编译并安装 ParFlow
 comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
 check
@@ -615,6 +661,11 @@ route "${cyellow}<<< c_make_pfl${cnormal}"
 
 c_substitutions_pfl(){
 route "${cyellow}>>> c_substitutions_pfl${cnormal}"
+  # ParFlow 补丁：PDAF 接口与 AMPS 相关调整
+
+  comment "    disable AMPS test builds (avoid duplicate symbol link errors)"
+    sed -i "s/^[[:space:]]*add_subdirectory[[:space:]]*(test\\/src)/# disabled AMPS tests: &/" $pfldir/pfsimulator/amps/CMakeLists.txt >> $log_file 2>> $err_file
+  check
 
     if [[ $withPDAF == "true" ]]; then
 
@@ -622,15 +673,15 @@ route "${cyellow}>>> c_substitutions_pfl${cnormal}"
         sed "s/PARFLOW_AMPS_LAYER PROPERTY STRINGS seq/PARFLOW_AMPS_LAYER PROPERTY STRINGS da seq/g" -i $pfldir/CMakeLists.txt >> $log_file 2>> $err_file
       check
       comment "    copy fix for PDAF into $pfldir"
-        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[3]}/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${pfl_model}/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
       check
-        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${pfl_model}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
       check
-        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[3]}/problem_saturation.c $pfldir/pfsimulator/parflow_lib
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${pfl_model}/problem_saturation.c $pfldir/pfsimulator/parflow_lib
       check
-        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[3]}/problem_phase_rel_perm.c $pfldir/pfsimulator/parflow_lib
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${pfl_model}/problem_phase_rel_perm.c $pfldir/pfsimulator/parflow_lib
       check
-        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${pfl_model}/da $pfldir/pfsimulator/amps
       check
     fi
 
@@ -645,6 +696,7 @@ route "${cyellow}<<< c_substitutions_pfl${cnormal}"
 
 c_substitutions_pdaf(){
 route "${cyellow}>>> c_substitutions_pdaf${cnormal}"
+  # PDAF 接口文件拷贝与替换
 
   comment "   mkdir  $dadir/interface"
     mkdir -p $dadir/interface  >> $log_file 2>> $err_file
@@ -667,6 +719,7 @@ route "${cyellow}<<< c_substitutions_pdaf${cnormal}"
 
 c_configure_pdaf_arch(){
 route "${cyellow}>>> c_configure_pdaf_arch${cnormal}"
+  # PDAF 架构相关配置（编译参数与头文件）
 
 #PDAF arch part
   file=$dadir/make.arch/${PDAF_ARCH}.h
@@ -711,6 +764,7 @@ route "${cyellow}<<< c_configure_pdaf_arch${cnormal}"
 
 c_configure_pdaf(){
 route "${cyellow}>>> c_configure_pdaf${cnormal}"
+  # PDAF Makefile/接口配置
 
 #PDAF interface part
   file1=$dadir/interface/model/Makefile
@@ -750,7 +804,7 @@ route "${cyellow}>>> c_configure_pdaf${cnormal}"
     sed -i "s,__cosdir__,${mList[2]}," $file1 $file2 >> $log_file 2>> $err_file
   check
   comment "   sed parflow directory to Makefiles"
-    sed -i "s,__pfldir__,${mList[3]}," $file1 $file2 >> $log_file 2>> $err_file
+    sed -i "s,__pfldir__,${pfl_model}," $file1 $file2 >> $log_file 2>> $err_file
   check
 
   comment "   cd to $dadir/interface/model"
@@ -772,6 +826,11 @@ route "${cyellow}<<< c_configure_pdaf${cnormal}"
 
 c_make_pdaf(){
 route "${cyellow}>>> c_make_pdaf${cnormal}"
+  # 编译 PDAF（model + framework）
+
+  comment "   ensure $dadir/include and $dadir/lib exist"
+    mkdir -p "$dadir/include" "$dadir/lib" >> $log_file 2>> $err_file
+  check
 
   comment "   cd to $dadir/src"
     cd $dadir/src >> $log_file 2>> $err_file
@@ -796,6 +855,3 @@ route "${cyellow}>>> c_make_pdaf${cnormal}"
 
 route "${cyellow}<<< c_make_pdaf${cnormal}"
 }
-
-
-

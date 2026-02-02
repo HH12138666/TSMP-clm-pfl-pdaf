@@ -1,19 +1,31 @@
-#export PATH="/home/c.hartick/TSMP/lib/openmpi/bin:$PATH"
-export PATH="/home/c.hartick/TSMP/lib/tcl/bin:$PATH"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/hdf5/lib"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/netcdf/lib"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/gribapi/lib"
-#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/hypre/lib"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/silo/lib"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/tcl/lib"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/eccodes/lib"
-#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/pnetcdf/lib"
+export PATH="/home/huanghui/data/test/TSMP/lib/tcl/bin:$PATH"
+export PATH="/home/huanghui/data/test/TSMP/lib/pnetcdf/bin:$PATH"
+export LD_LIBRARY_PATH="/home/huanghui/data/test/TSMP/lib/hdf5/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/home/huanghui/data/test/TSMP/lib/netcdf/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/home/huanghui/data/test/TSMP/lib/gribapi/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/home/huanghui/data/test/TSMP/lib/hypre/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/home/huanghui/data/test/TSMP/lib/silo/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/home/huanghui/data/test/TSMP/lib/tcl/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/home/huanghui/data/test/TSMP/lib/eccodes/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/home/huanghui/data/test/TSMP/lib/pnetcdf/lib:$LD_LIBRARY_PATH"
 
-export GRIB_DEFINITION_PATH=/home/c.hartick/TSMP/lib/gribapi/share/grib_api/definitions/
-export GRIB_SAMPLES_PATH=/home/c.hartick/TSMP/lib/gribapi/share/grib_api/samples/
+export PARFLOW_DIR=/home/huanghui/data/test/TSMP/bin/GENERIC_X86_clm3-pfl-pdaf
+export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
 
-#export CC=/home/c.hartick/TSMP/lib/openmpi/bin/mpicc
-#export FC=/home/c.hartick/TSMP/lib/openmpi/bin/mpif90
-#export F77=/home/c.hartick/TSMP/lib/openmpi/bin/mpif77
+export GRIB_DEFINITION_PATH=/home/huanghui/data/test/TSMP/lib/gribapi/share/grib_api/definitions/
+export GRIB_SAMPLES_PATH=/home/huanghui/data/test/TSMP/lib/gribapi/share/grib_api/samples/
 
 
+export NETCDF_DIR=/home/huanghui/data/test/TSMP/lib/netcdf
+export HDF5_DIR=/home/huanghui/data/test/TSMP/lib/hdf5
+export CC=/usr/bin/mpicc
+export FC=/usr/bin/mpif90
+
+
+export FFLAGS="-fallow-argument-mismatch $FFLAGS"
+export FCFLAGS="-fallow-argument-mismatch $FCFLAGS"
+
+
+#export CC=/home/huanghui/data/test/TSMP/lib/openmpi/bin/mpicc
+#export FC=/home/huanghui/data/test/TSMP/lib/openmpi/bin/mpif90
+#export F77=/home/huanghui/data/test/TSMP/lib/openmpi/bin/mpif77

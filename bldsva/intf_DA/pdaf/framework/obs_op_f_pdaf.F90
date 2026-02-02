@@ -69,6 +69,16 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
 
   IMPLICIT NONE
 
+  interface
+     subroutine mpi_allgatherv(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, ierror)
+       type(*), dimension(*), intent(in) :: sendbuf
+       integer, intent(in) :: sendcount, sendtype, recvtype, comm
+       type(*), dimension(*), intent(inout) :: recvbuf
+       integer, dimension(*), intent(in) :: recvcounts, displs
+       integer, intent(out) :: ierror
+     end subroutine mpi_allgatherv
+  end interface
+
   ! !ARGUMENTS:
   INTEGER, INTENT(in) :: step                 ! Current time step
   INTEGER, INTENT(in) :: dim_p                ! PE-local dimension of state

@@ -30,8 +30,12 @@ route "${cyellow}>> configure_clm${cnormal}"
   file=$clmdir/scripts/ccsm_utils/Machines/Makefile
   file2=$clmdir/models/utils/oas3/Makefile
   file3=$clmdir/scripts/ccsm_utils/Machines/config_compilers.xml
+  gfortran_mismatch=""
+  if [[ $compiler == "Gnu" ]]; then
+    gfortran_mismatch="-fallow-argument-mismatch"
+  fi
   comment "   sed comflg to clm Makefiles"
-    sed -i "s@__comflg__@$optComp $cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DTREAT_OVERLAY $cplFlag@" $file $file2 >> $log_file 2>> $err_file
+    sed -i "s@__comflg__@$optComp $gfortran_mismatch $cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DTREAT_OVERLAY $cplFlag@" $file $file2 >> $log_file 2>> $err_file
   check
   comment "   sed ldflg to clm Makefiles"
     sed -i "s@__ldflg__@$cplLib@" $file $file2 >> $log_file 2>> $err_file
@@ -178,5 +182,4 @@ route "${cyellow}>> substitutions_clm${cnormal}"
 
 route "${cyellow}<< substitutions_clm${cnormal}"
 }
-
 

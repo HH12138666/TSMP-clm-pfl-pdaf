@@ -42,9 +42,9 @@ route "${cyellow}>> configure_da${cnormal}"
 #    libs_src=" -L$lapackPath -llapack -lblas -L${mpiPath}/lib64"
 #    libs_src=" -L$lapackPath/mkl/lib/intel64 -Wl,--no-as-needed -lmkl_scalapack_ilp64 -lmkl_cdft_core -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lmkl_blacs_intelmpi_ilp64 -lm -ldl -L${mpiPath}/lib64 -lirc -lintlc"
   if [[ $compiler == "Gnu" ]]; then
-    libs_src=" -ldl $lapackPath/mkl/latest/lib/intel64/libmkl_gf_lp64.a $lapackPath/mkl/latest/lib/intel64/libmkl_gnu_thread.a $lapackPath/mkl/latest/lib/intel64/libmkl_core.a -L${mpiPath}/lib64"
+    libs_src=" -llapack -lblas -ldl -L${mpiPath}/lib64"
   else
-    libs_src=" $lapackPath/mkl/latest/lib/intel64/libmkl_intel_lp64.a $lapackPath/mkl/latest/lib/intel64/libmkl_intel_thread.a $lapackPath/mkl/latest/lib/intel64/libmkl_core.a -L${mpiPath}/lib64"
+    libs_src=" -llapack -lblas -ldl -L${mpiPath}/lib64"
   fi
 
   c_configure_pdaf_arch
@@ -65,7 +65,7 @@ route "${cyellow}>> configure_da${cnormal}"
     cppdefs+=" ${pf}-DPDAF_DEBUG "
   fi
   obj=' '
-  libs=" -L$mpiPath -lmpich -L$netcdfPath/lib/ -lnetcdff -lnetcdf "
+  libs=" -L$mpiPath -lmpi -L$ncdfPath/lib/ -lnetcdff -lnetcdf "
   libsOAS=" "
   libsPFL=" "
   libsCLM=" "
@@ -86,7 +86,7 @@ route "${cyellow}>> configure_da${cnormal}"
   importFlagsPFL+="-I$pfldir/pfsimulator/parflow_lib "
   importFlagsPFL+="-I$pfldir/pfsimulator/amps/oas3 "
   importFlagsPFL+="-I$pfldir/pfsimulator/amps/common "
-  if [[ ${mList[3]} == parflow ]] ; then
+  if [[ ${pfl_model} == parflow ]] ; then
     importFlagsPFL+="-I$pfldir/build/include "
     if [[ $processor == "GPU" ]]; then
       importFlagsPFL+="-I$pfldir/rmm/include/rmm "
@@ -98,7 +98,7 @@ route "${cyellow}>> configure_da${cnormal}"
   # DA include dirs
   importFlagsDA+="-I$dadir/interface/model/common "
   if [[ $withPFL == "true" ]] ; then
-    importFlagsDA+="-I$dadir/interface/model/${mList[3]} "
+    importFlagsDA+="-I$dadir/interface/model/${pfl_model} "
   fi
 
   # Oasis libraries
@@ -133,7 +133,7 @@ route "${cyellow}>> configure_da${cnormal}"
     libsPFL+="-lnvToolsExt "
   fi
   libsPFL+="-L$hyprePath/lib -lHYPRE "
-  libsPFL+="-L$siloPath/lib -lsilo "
+  libsPFL+="-L$siloPath/lib -lsiloh5 "
 
   if [[ $withOAS == "false" && $withPFL == "true" ]] ; then
      importFlags+=$importFlagsPFL
@@ -175,7 +175,7 @@ route "${cyellow}>> configure_da${cnormal}"
      libs+=" -L$clmdir/build/lib/ -locn -lrof -lglc -lwav -lesp "
      libs+=" -L$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/c1a1l1i1o1r1g1w1e1/lib -lcsm_share "
      libs+=" -L$clmdir/build/intel/mpi/nodebug/nothreads/lib -lpio -lgptl -lmct -lmpeu  "
-     libs+=" -lpnetcdf  -mkl -lnetcdff -lnetcdf "
+     libs+=" -lpnetcdf -lnetcdff -lnetcdf -llapack -lblas "
      obj+=' $(OBJCLM5)'
     fi
     if [[ ${mList[1]} == eclm ]] ; then

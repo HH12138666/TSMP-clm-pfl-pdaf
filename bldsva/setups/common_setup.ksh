@@ -143,9 +143,15 @@ else
         comment "   copy slopes and slope script into rundir"
           cp $forcingdir_pfl/ascii2*.tcl $rundir/ >> $log_file 2>> $err_file
 		check_pfl
-          cp $forcingdir_pfl/$slope $rundir >> $log_file 2>> $err_file
-		check_pfl
-          chmod u+w $rundir/$slope  $rundir/ascii2*.tcl >> $log_file 2>> $err_file
+          if [[ -n "$slope" ]]; then
+            for slope_file in $slope; do
+              cp "$forcingdir_pfl/$slope_file" "$rundir/" >> $log_file 2>> $err_file
+              check_pfl
+              chmod u+w "$rundir/$slope_file" >> $log_file 2>> $err_file
+              check_pfl
+            done
+          fi
+          chmod u+w $rundir/ascii2*.tcl >> $log_file 2>> $err_file
 		comment "   sed procs into slopescript"
           sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	

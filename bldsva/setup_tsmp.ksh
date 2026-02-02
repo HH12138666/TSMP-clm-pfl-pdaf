@@ -238,6 +238,10 @@ setSelection(){
 
        mListgen="clm5-cos5-pfl-pdaf"
 
+     elif echo "$combination" | grep -q 'clm' && echo "$combination" | grep -q 'pfl' && ! echo "$combination" | grep -q 'cos' && ! echo "$combination" | grep -q 'icon'; then
+
+       mListgen="clm3-pfl-pdaf"
+
      else
 
        if echo "$combination" | grep -q 'cos4'; then
@@ -1603,7 +1607,13 @@ check
     if [[ $withOAS == "true" ]] ; then ; setup_oas ;  fi
 
     if [[ $withPDAF == "true" ]] ; then
-      cp ${pflrunname}_$(printf "%05d" $instance).pfidb $origrundir/tsmp_instance_$(printf "%05d" $instance)   		
+      pfidb_inst="${pflrunname}_$(printf "%05d" $instance).pfidb"
+      pfidb_root="${pflrunname}.pfidb"
+      if [[ -f "$pfidb_inst" ]] ; then
+        cp "$pfidb_inst" "$origrundir/tsmp_instance_$(printf "%05d" $instance)"
+      elif [[ -f "$pfidb_root" ]] ; then
+        cp "$pfidb_root" "$origrundir/tsmp_instance_$(printf "%05d" $instance)"
+      fi
     else	
       finalizeSetup
     fi
@@ -1650,4 +1660,3 @@ check
   print "Rootdir: ${rootdir}"
   print "Bindir: ${bindir}"
   print "Rundir: ${rundir}" 
-

@@ -11,6 +11,10 @@ route "${cyellow}>> configure_clm${cnormal}"
   comment " source software and cesm input paths"
     source $rootdir/bldsva/intf_oas3/clm5_0/arch/config/softwarepaths.ksh
   check
+  if [[ $compiler == "Gnu" ]]; then
+    export FFLAGS="-fallow-argument-mismatch $FFLAGS"
+    export FCFLAGS="-fallow-argument-mismatch $FCFLAGS"
+  fi
 
 #  cplFlag=""
 #  cplLib=""
@@ -167,9 +171,9 @@ route "${cyellow}>> substitutions_clm${cnormal}"
 
   if [[ $withPDAF == "true" ]] ; then
     comment " substitutions with pdaf"
-    patch $rootdir/bldsva/intf_DA/${mList[4]}/tsmp/${mList[1]}/cime_comp_mod.F90 $clmdir/cime/src/drivers/mct/main
+    patch $rootdir/bldsva/intf_DA/${da_model}/tsmp/${mList[1]}/cime_comp_mod.F90 $clmdir/cime/src/drivers/mct/main
     check
-    patch $rootdir/bldsva/intf_DA/${mList[4]}/tsmp/${mList[1]}/seq_comm_mct.F90 $clmdir/cime/src/drivers/mct/shr
+    patch $rootdir/bldsva/intf_DA/${da_model}/tsmp/${mList[1]}/seq_comm_mct.F90 $clmdir/cime/src/drivers/mct/shr
     check
   fi
   

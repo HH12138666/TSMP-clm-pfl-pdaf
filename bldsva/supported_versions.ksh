@@ -21,15 +21,15 @@ platforms+=(
 # list of available versions for a platform
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
-        ["JURECA"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
+        ["JURECA"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm3-pfl-pdaf clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
                      clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
-        ["JUWELS"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
+        ["JUWELS"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm3-pfl-pdaf clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
                      clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
-        ["DEEP"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
+        ["DEEP"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm3-pfl-pdaf clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
                      clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
-        ["JUSUF"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
+        ["JUSUF"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm3-pfl-pdaf clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
                      clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
-        ["GENERIC_X86"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
+        ["GENERIC_X86"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm3-pfl-pdaf clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
                      clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
 )
 
@@ -38,6 +38,7 @@ versions+=(
         ["clm3-cos4-pfl"]=" clm3_5, Cosmo4.21, Oasis3-MCT and Parflow >=3.10"
         ["clm3-cos4-pfl-pdaf"]="with PDAF Data Assimilation"
         ["clm3-cos5-pfl"]="Cosmo5.1 and Parflow >=3.10 with Oasis3-MCT"
+        ["clm3-pfl-pdaf"]="CLM3.5 and Parflow >=3.10 with Oasis3-MCT (no Cosmo) and PDAF"
         ["clm4-cos4-pfl"]="Cosmo4.21 & CESM and Parflow >=3.10 with Oasis3-MCT"
         ["clm4-cos5-pfl"]="Cosmo5.1 & CESM and Parflow >=3.10 with Oasis3-MCT"
         ["clm3-cos5-pfl-pdaf"]="with PDAF Data Assimilation"
@@ -57,6 +58,7 @@ modelVersion+=(
         ["clm3-cos4-pfl"]="oasis3-mct clm3_5 cosmo4_21 parflow"
         ["clm3-cos4-pfl-pdaf"]="oasis3-mct clm3_5 cosmo4_21 parflow pdaf"
         ["clm3-cos5-pfl"]="oasis3-mct clm3_5 cosmo5_1 parflow"
+        ["clm3-pfl-pdaf"]="oasis3-mct clm3_5 parflow pdaf"
         ["clm4-cos4-pfl"]="oasis3-mct clm4_0 cosmo4_21 parflow"
         ["clm4-cos5-pfl"]="oasis3-mct clm4_0 cosmo5_1 parflow"
         ["clm3-cos5-pfl-pdaf"]="oasis3-mct clm3_5 cosmo5_1 parflow pdaf"
@@ -79,6 +81,7 @@ combinations+=(
         ["clm4-cos4-pfl"]=" clm cos pfl clm-cos "
         ["clm4-cos5-pfl"]=" clm cos pfl clm-cos "
         ["clm3-cos5-pfl-pdaf"]=" clm-cos-pfl clm pfl clm-cos clm-pfl cos "
+        ["clm3-pfl-pdaf"]=" clm-pfl "
 		["clm3-icon21-pfl"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
 		["clm3-icon26-pfl"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
         ["eclm"]=" clm "
@@ -109,4 +112,3 @@ setupsAvail+=(
     ["DEEP"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
 	["GENERIC_X86"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
 )
-

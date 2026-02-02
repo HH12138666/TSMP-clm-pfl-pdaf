@@ -3,21 +3,27 @@
 
 getMachineDefaults(){
 route "${cyellow}>> getMachineDefaults${cnormal}"
-  #defaultMpiPath="$rootdir/lib/openmpi"
-  defaultMpiPath=/usr/lib/x86_64-linux-gnu
+  if [[ -x "$rootdir/lib/openmpi/bin/mpicc" ]] then
+    defaultMpiPath="$rootdir/lib/openmpi"
+  elif [[ -x /usr/bin/mpicc ]] then
+    defaultMpiPath=/usr
+  else
+    defaultMpiPath=/usr/lib/x86_64-linux-gnu
+  fi
   defaultNcdfPath="$rootdir/lib/netcdf"
   defaultGribPath="$rootdir/lib/gribapi"
   defaultGribapiPath="$rootdir/lib/gribapi"
   defaultJasperPath=""
 #  defaultTclPath="/usr/lib/x86_64-linux-gnu"
   defaultTclPath="$rootdir/lib/tcl"
-  #defaultHyprePath="$rootdir/lib/hypre"
-  defaultHyprePath=/usr/lib/x86_64-linux-gnu
+  defaultHyprePath="$rootdir/lib/hypre"
+  #defaultHyprePath=/usr/lib/x86_64-linux-gnu
   defaultSiloPath="$rootdir/lib/silo"
   hdf5path="$rootdir/lib/hdf5"
   defaultLapackPath=""
-  defaultPncdfPath=""
+  defaultPncdfPath="$rootdir/lib/pnetcdf"
   export PATH="$defaultTclPath/bin:$PATH"
+  export LD_LIBRARY_PATH="$defaultNcdfPath/lib:$LD_LIBRARY_PATH"
   export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$defaultSiloPath/lib"
   #echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   #echo "tclsh is loaded "

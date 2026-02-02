@@ -1,7 +1,10 @@
 [DA]
 nreal = __ninst__
 outdir = "./pdafout"
-da_interval       = 24
+#
+# NOTE: For ideal300150 (endtime ~3.0025), keep da_interval <= endtime to avoid PDAF init errors.
+# This default targets ideal300150; adjust if you run longer cases.
+da_interval       = 0.25
 stat_dumpoffset   = 0
 
 [PF]

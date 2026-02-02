@@ -32,10 +32,10 @@ freq2OAS=900
 
 deltaobs=1
 
-indPFL=
+indPFL="rurSoil.sa"
 indPFL2=$indPFL
 pfsolPFL=
-inipress= *.pfb
-slope= 
+inipress="*.pfb"
+slope="xslope.pfb yslope.pfb"
 
 rtimeFactor=1
