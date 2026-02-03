@@ -21,11 +21,8 @@ export HDF5_DIR=/home/huanghui/data/test/TSMP/lib/hdf5
 export CC=/usr/bin/mpicc
 export FC=/usr/bin/mpif90
 
-
 export FFLAGS="-fallow-argument-mismatch $FFLAGS"
 export FCFLAGS="-fallow-argument-mismatch $FCFLAGS"
 
 
-#export CC=/home/huanghui/data/test/TSMP/lib/openmpi/bin/mpicc
-#export FC=/home/huanghui/data/test/TSMP/lib/openmpi/bin/mpif90
-#export F77=/home/huanghui/data/test/TSMP/lib/openmpi/bin/mpif77
+

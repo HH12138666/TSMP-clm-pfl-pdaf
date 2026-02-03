@@ -9,3 +9,8 @@ doc/_build/**
 /pdaf_GENERIC_X86_clm3-pfl-pdaf/
 /tsmp_idealscal/
 /lib/
+/pdaf/
+/clm3_5/
+/parflow/
+/oasis3-mct/
+
