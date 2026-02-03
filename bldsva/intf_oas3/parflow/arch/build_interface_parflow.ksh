@@ -37,6 +37,10 @@ route "${cyellow}>> configure_pfl${cnormal}"
     flagsSim+=" -DCMAKE_BUILD_TYPE=Release"
     flagsSim+=" -DPARFLOW_ENABLE_TIMING=TRUE"
     flagsSim+=" -DCMAKE_INSTALL_PREFIX=$PARFLOW_INS"
+    flagsSim+=" -DCMAKE_EXE_LINKER_FLAGS=-Wl,--no-as-needed"
+    flagsSim+=" -DCMAKE_SHARED_LINKER_FLAGS=-Wl,--no-as-needed"
+    flagsSim+=" -DCMAKE_C_STANDARD_LIBRARIES=-lstdc++"
+
     # NetCDF C/Fortran 路径
     flagsSim+=" -DCMAKE_PREFIX_PATH=$ncdfPath"
     flagsSim+=" -DCMAKE_LIBRARY_PATH=$ncdfPath/lib"

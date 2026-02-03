@@ -789,7 +789,7 @@ route "${cyellow}>>> c_configure_pdaf${cnormal}"
     sed -i "s,__fcpp_defs__,$cppdefs," $file1 $file2 >> $log_file 2>> $err_file
   check
   comment "   sed libs to Makefiles"
-    sed -i "s,__libs__,$libs," $file2 >> $log_file 2>> $err_file
+  sed -i "s|__libs__|$libs|" $file2 >> $log_file 2>> $err_file
   check
   comment "   sed obj to Makefiles"
     sed -i "s,__obj__,$obj," $file1 >> $log_file 2>> $err_file

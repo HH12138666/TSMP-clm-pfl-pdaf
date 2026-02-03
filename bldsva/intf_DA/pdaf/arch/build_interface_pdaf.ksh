@@ -65,7 +65,7 @@ route "${cyellow}>> configure_da${cnormal}"
     cppdefs+=" ${pf}-DPDAF_DEBUG "
   fi
   obj=' '
-  libs=" -L$mpiPath -lmpi -L$ncdfPath/lib/ -lnetcdff -lnetcdf "
+  libs=" -L$mpiPath -lmpi -L$ncdfPath/lib/ -Wl,--no-as-needed -lnetcdff -lnetcdf -Wl,--as-needed "
   libsOAS=" "
   libsPFL=" "
   libsCLM=" "
@@ -134,6 +134,8 @@ route "${cyellow}>> configure_da${cnormal}"
   fi
   libsPFL+="-L$hyprePath/lib -lHYPRE "
   libsPFL+="-L$siloPath/lib -lsiloh5 "
+  libsPFL+="-lstdc++ "
+
 
   if [[ $withOAS == "false" && $withPFL == "true" ]] ; then
      importFlags+=$importFlagsPFL
